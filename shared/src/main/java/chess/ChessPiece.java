@@ -206,6 +206,29 @@ public class ChessPiece {
             int columnLeft = col - 1;
             int columnRight = col + 1;
 
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (i != 1 && j != 1) {
+                        int rowChange = i - 1;
+                        int colChange = j - 1;
+                        int currentRow = row + rowChange;
+                        int currentCol = col + colChange;
+                        if (currentRow > 0 && currentRow < 9 && currentCol > 0 && currentCol < 9) {
+                            ChessPosition newPosition = new ChessPosition(currentRow, currentCol);
+                            if (board.getPiece(newPosition) != null) {
+                                ChessPiece foundPiece = board.getPiece(newPosition);
+                                if (foundPiece.getTeamColor() != this.pieceColor) {
+                                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
+                                }
+                            } else {
+                                possibleMoves.add(new ChessMove(myPosition, newPosition, null));
+                            }
+                        }
+
+                    }
+                }
+            }
+            /*
             // straight up
             if (rowUp < 9) {
                 ChessPosition newPosition = new ChessPosition(rowUp, col);
@@ -302,7 +325,7 @@ public class ChessPiece {
                 } else {
                     possibleMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
-            }
+            }*/
         }
         else if (this.type == PieceType.QUEEN) {throw new RuntimeException("Not implemented");}
         else if (this.type == PieceType.KNIGHT) {throw new RuntimeException("Not implemented");}
