@@ -363,8 +363,72 @@ public class ChessPiece {
             ChessPosition newPosition = new ChessPosition(twoDown, oneRight);
             boolean notUsed = checkNewSpace(board, myPosition, newPosition, possibleMoves);
         }
-    }    void findPawnMoves (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
-        throw new RuntimeException("Not implemented");
+    }
+    void findPawnMoves (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
+        // one space towards opposite team, optional two if in starting position
+        // diagonal forward if capturing piece
+        int col = myPosition.getColumn();
+        int row = myPosition.getRow();
+
+        int oneUp = row + 1;
+        int twoUp = row + 2;
+        int oneDown = row - 1;
+        int twoDown = row - 2;
+        int oneLeft = col - 1;
+        int oneRight = col + 1;
+
+        boolean firstMove = false;
+        boolean diagonal = false;
+
+        // check if is in starting position
+        if (this.pieceColor == ChessGame.TeamColor.BLACK) {
+            boolean teamColor = false;
+            // normal move
+            if (oneDown > 0) {
+                ChessPosition newPosition = new ChessPosition(oneDown, col);
+                if (row == 7) {
+                    firstMove = true;
+                }
+                checkNewSpacePawn(board, myPosition, newPosition, possibleMoves, firstMove, teamColor, diagonal);
+
+                // diagonal capture left
+                if (oneLeft > 0) {
+                    diagonal = true;
+                    ChessPosition diagonalLeft = new ChessPosition(oneDown, oneLeft);
+                    checkNewSpacePawn(board, myPosition, diagonalLeft, possibleMoves, firstMove, teamColor, diagonal);
+                }
+                if (oneRight < 9) {
+                    diagonal = true;
+                    ChessPosition diagonalRight = new ChessPosition(oneDown, oneRight);
+                    checkNewSpacePawn(board, myPosition, diagonalRight, possibleMoves, firstMove, teamColor, diagonal);
+                }
+            }
+
+        } else {
+            boolean teamColor = true;
+            // normal move
+            if (oneUp < 9) {
+                ChessPosition newPosition = new ChessPosition(oneUp, col);
+                // include optional 2 square move
+                if (row == 2) {
+                    firstMove = true;
+                }
+                checkNewSpacePawn(board, myPosition, newPosition, possibleMoves, firstMove, teamColor, diagonal);
+
+                // diagonal capture
+                if (oneLeft > 0) {
+                    diagonal = true;
+                    ChessPosition diagonalLeft = new ChessPosition(oneUp, oneLeft);
+                    checkNewSpacePawn(board, myPosition, diagonalLeft, possibleMoves, firstMove, teamColor, diagonal);
+                }
+                if (oneRight < 9) {
+                    diagonal = true;
+                    ChessPosition diagonalRight = new ChessPosition(oneUp, oneRight);
+                    checkNewSpacePawn(board, myPosition, diagonalRight, possibleMoves, firstMove, teamColor, diagonal);
+                }
+            }
+
+        }
     }
 
 
@@ -379,6 +443,59 @@ public class ChessPiece {
 
         possibleMoves.add(new ChessMove(myPosition, newPosition, null)); // empty space on board found
         return false;
+    }
+
+    void checkNewSpacePawn(ChessBoard board, ChessPosition myPosition, ChessPosition newPosition,
+                           Collection<ChessMove> possibleMoves, boolean firstMove, boolean teamColor, boolean diagonal) {
+
+        if (board.getPiece(newPosition) == null) {
+            if (diagonal) {
+                return;
+            }
+            // check if promoting
+            if (newPosition.getRow() == 1 || newPosition.getRow() == 8) {
+                possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+            } else {
+                possibleMoves.add(new ChessMove(myPosition, newPosition, null));
+            }
+
+            if (firstMove) { // optional double move
+                if (!teamColor) {
+                    int twoDown = myPosition.getRow() - 2;
+                    int col = myPosition.getColumn();
+                    ChessPosition doubleMove = new ChessPosition(twoDown, col);
+                    if (board.getPiece(doubleMove) == null) {
+                        possibleMoves.add(new ChessMove(myPosition, doubleMove, null));
+                    }
+                } else {
+                    int twoUp = myPosition.getRow() + 2;
+                    int col = myPosition.getColumn();
+                    ChessPosition doubleMove = new ChessPosition(twoUp, col);
+                    if (board.getPiece(doubleMove) == null) {
+                        possibleMoves.add(new ChessMove(myPosition, doubleMove, null));
+                    }
+                }
+            }
+        }
+        // diagonal capture
+        if (diagonal) {
+            ChessPiece foundPiece = board.getPiece(newPosition);
+            if (foundPiece.getTeamColor() != this.pieceColor) {
+                // check if promoting
+                if (newPosition.getRow() == 1 || newPosition.getRow() == 8) {
+                    possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                    possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                    possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                    possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                } else {
+                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
+                }
+
+            }
+        }
     }
 
     @Override
