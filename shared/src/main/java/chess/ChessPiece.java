@@ -55,271 +55,318 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> possibleMoves = new HashSet<>();
-        int col = myPosition.getColumn();
-        int row = myPosition.getRow();
-
 
         // calculations for all moves possible for each piece type
-        if (this.type == PieceType.BISHOP) { // diagonal movements until edge or another piece is found
-            boolean upRightEndFound = false;
-            boolean upLeftEndFound = false;
-            boolean downRightEndFound = false;
-            boolean downLeftEndFound = false;
-
-            for ( int i = 1; i < 9; i++) { // all 4 directions in one loop
-                int columnLeft = col - i;
-                int columnRight = col + i;
-                int rowUp = row + i;
-                int rowDown = row - i;
-
-                if (!upRightEndFound) {
-                    if (columnRight < 9 && rowUp < 9 ) {
-                        ChessPosition upRightPosition = new ChessPosition(rowUp, columnRight);
-                        upRightEndFound = checkNewSpace(board, myPosition, upRightPosition, possibleMoves);
-                    } else {
-                        upRightEndFound = true;
-                    }
-
-                }
-                if (!upLeftEndFound) {
-                    if (columnLeft > 0 && rowUp < 9) {
-                        ChessPosition upLeftPosition = new ChessPosition(rowUp, columnLeft);
-                        upLeftEndFound = checkNewSpace(board, myPosition, upLeftPosition, possibleMoves);
-                    } else {
-                        upLeftEndFound = true;
-                    }
-                }
-                if (!downRightEndFound) {
-                    if (columnRight < 9 && rowDown > 0) {
-                        ChessPosition downRightPosition = new ChessPosition(rowDown, columnRight);
-                        downRightEndFound = checkNewSpace(board, myPosition, downRightPosition, possibleMoves);
-                    } else {
-                        downRightEndFound = true;
-                    }
-                }
-                if (!downLeftEndFound) {
-                    if (columnLeft > 0 && rowDown > 0) {
-                        ChessPosition downLeftPosition = new ChessPosition(rowDown, columnLeft);
-                        downLeftEndFound = checkNewSpace(board, myPosition, downLeftPosition, possibleMoves);
-                    } else {
-                        downLeftEndFound = true;
-                    }
-                }
-                if (upRightEndFound && upLeftEndFound && downLeftEndFound && downRightEndFound) {
-                    break;
-                }
-            }
-
-            /*
-
-
-
-
-            for (int i = 1; i < 9; i++) { // up and left
-                int columnLeft = col - i;
-                int rowUp = row + i;
-                if (columnLeft > 0 && rowUp < 9) {
-                    ChessPosition newPosition = new ChessPosition(rowUp, columnLeft);
-                    if (board.getPiece(newPosition) != null) {
-                        ChessPiece foundPiece = board.getPiece(newPosition);
-                        if (foundPiece.getTeamColor() != this.pieceColor) {
-                            possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                        break; // edge or piece was found
-                    }
-
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, null)); // empty space on board found
-                } else {
-                    break;
-                }
-            }
-            for (int i = 1; i < 9; i++) { // up and right
-                int columnRight = col + i;
-                int rowUp = row + i;
-                if (columnRight < 9 && rowUp < 9) {
-                    ChessPosition newPosition = new ChessPosition(rowUp, columnRight);
-                    if (board.getPiece(newPosition) != null) {
-                        ChessPiece foundPiece = board.getPiece(newPosition);
-                        if (foundPiece.getTeamColor() != this.pieceColor) {
-                            possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                        break;
-                    }
-
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                } else {
-                    break;
-                }
-
-            }
-            for (int i = 1; i < 9; i++) { // down and left
-                int columnLeft = col - i;
-                int rowDown = row - i;
-                if (columnLeft > 0 && rowDown > 0) {
-                    ChessPosition newPosition = new ChessPosition(rowDown, columnLeft);
-                    if (board.getPiece(newPosition) != null) {
-                        ChessPiece foundPiece = board.getPiece(newPosition);
-                        if (foundPiece.getTeamColor() != this.pieceColor) {
-                            possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                        break;
-                    }
-
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                } else {
-                    break;
-                }
-            }
-            for (int i = 1; i < 9; i++) { // down and right
-                int columnRight = col + i;
-                int rowDown = row - i;
-                if (columnRight > 0 && rowDown > 0) {
-                    ChessPosition newPosition = new ChessPosition(rowDown, columnRight);
-                    if (board.getPiece(newPosition) != null) {
-                        ChessPiece foundPiece = board.getPiece(newPosition);
-                        if (foundPiece.getTeamColor() != this.pieceColor) {
-                            possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                        break;
-                    }
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                } else {
-                    break;
-                }
-            }
-            */
-
+        switch(this.type) {
+            case BISHOP:
+                findBishopMoves(board, myPosition, possibleMoves);
+                break;
+            case ROOK:
+                findRookMoves(board, myPosition, possibleMoves);
+                break;
+            case KING:
+                findKingMoves(board, myPosition, possibleMoves);
+                break;
+            case QUEEN:
+                findQueenMoves(board, myPosition, possibleMoves);
+                break;
+            case KNIGHT:
+                findKnightMoves(board, myPosition, possibleMoves);
+                break;
+            default:
+                findPawnMoves(board, myPosition, possibleMoves);
         }
-        else if (this.type == PieceType.ROOK) { // x and y-axis until edge or piece found
-            boolean upEndFound = false;
-            boolean downEndFound = false;
-            boolean rightEndFound = false;
-            boolean leftEndFound = false;
-
-            for (int i = 1; i < 9; i++) { // all four directions in one loop
-                int rowUp = row + i;
-                int rowDown = row - i;
-                int columnLeft = col - i;
-                int columnRight = col + i;
-
-                if (!upEndFound) {
-                    if (rowUp < 9) {
-                        ChessPosition upPosition = new ChessPosition(rowUp, col);
-                        upEndFound = checkNewSpace(board, myPosition, upPosition, possibleMoves);
-                    } else {
-                        upEndFound = true;
-                    }
-                }
-                if (!downEndFound) {
-                    if (rowDown > 0) {
-                        ChessPosition downPosition = new ChessPosition(rowDown, col);
-                        downEndFound = checkNewSpace(board, myPosition, downPosition, possibleMoves);
-                    } else {
-                        downEndFound = true;
-                    }
-                }
-                if (!leftEndFound) {
-                    if (columnLeft > 0) {
-                        ChessPosition leftPosition = new ChessPosition(row, columnLeft);
-                        leftEndFound = checkNewSpace(board, myPosition, leftPosition, possibleMoves);
-                    } else {
-                        leftEndFound = true;
-                    }
-                }
-                if (!rightEndFound) {
-                    if (columnRight < 9) {
-                        ChessPosition rightPosition = new ChessPosition(row, columnRight);
-                        rightEndFound = checkNewSpace(board, myPosition, rightPosition, possibleMoves);
-                    } else {
-                        rightEndFound = true;
-                    }
-                }
-                if (upEndFound && downEndFound && rightEndFound && leftEndFound) {
-                    break;
-                }
-            }
-
-            /*
-            for (int i = 1; i < 9; i++) { // straight down
-                int rowDown = row - i;
-                if (rowDown > 0) {
-                    ChessPosition newPosition = new ChessPosition(rowDown, col);
-                    if (board.getPiece(newPosition) != null) {
-                        ChessPiece foundPiece = board.getPiece(newPosition);
-                        if (foundPiece.getTeamColor() != this.pieceColor) {
-                            possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                        break;
-                    }
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                } else {
-                    break;
-                }
-            }
-            for (int i = 1; i < 9; i++) { // straight left
-                int columnLeft = col - i;
-                if (columnLeft > 0) {
-                    ChessPosition newPosition = new ChessPosition(row, columnLeft);
-                    if (board.getPiece(newPosition) != null) {
-                        ChessPiece foundPiece = board.getPiece(newPosition);
-                        if (foundPiece.getTeamColor() != this.pieceColor) {
-                            possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                        break;
-                    }
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                } else {
-                    break;
-                }
-            }
-            for (int i = 1; i < 9; i++) { // straight right
-                int columnRight = col + i;
-                if (columnRight < 9) {
-                    ChessPosition newPosition = new ChessPosition(row, columnRight);
-                    if (board.getPiece(newPosition) != null) {
-                        ChessPiece foundPiece = board.getPiece(newPosition);
-                        if (foundPiece.getTeamColor() != this.pieceColor) {
-                            possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                        break;
-                    }
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                } else {
-                    break;
-                }
-            }
-            */
-        }
-        else if (this.type == PieceType.KING) { // one tile in each direction
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    if ( i == 1 && j == 1 ) {
-                    } else {
-                        int rowChange = i - 1;
-                        int colChange = j - 1;
-                        int currentRow = row + rowChange;
-                        int currentCol = col + colChange;
-                        if (currentRow > 0 && currentRow < 9 && currentCol > 0 && currentCol < 9) {
-                            ChessPosition newPosition = new ChessPosition(currentRow, currentCol);
-                            if (board.getPiece(newPosition) != null) {
-                                ChessPiece foundPiece = board.getPiece(newPosition);
-                                if (foundPiece.getTeamColor() != this.pieceColor) {
-                                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                                }
-                            } else {
-                                possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else if (this.type == PieceType.QUEEN) {throw new RuntimeException("Not implemented");}
-        else if (this.type == PieceType.KNIGHT) {throw new RuntimeException("Not implemented");}
-        else {throw new RuntimeException("Not implemented");}
 
         return possibleMoves;
     }
+
+    void findBishopMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
+        int col = myPosition.getColumn();
+        int row = myPosition.getRow();
+
+        boolean upRightEndFound = false;
+        boolean upLeftEndFound = false;
+        boolean downRightEndFound = false;
+        boolean downLeftEndFound = false;
+
+        for ( int i = 1; i < 9; i++) { // all 4 directions in one loop
+            int columnLeft = col - i;
+            int columnRight = col + i;
+            int rowUp = row + i;
+            int rowDown = row - i;
+
+            if (!upRightEndFound) {
+                if (columnRight < 9 && rowUp < 9 ) {
+                    ChessPosition upRightPosition = new ChessPosition(rowUp, columnRight);
+                    upRightEndFound = checkNewSpace(board, myPosition, upRightPosition, possibleMoves);
+                } else {
+                    upRightEndFound = true;
+                }
+
+            }
+            if (!upLeftEndFound) {
+                if (columnLeft > 0 && rowUp < 9) {
+                    ChessPosition upLeftPosition = new ChessPosition(rowUp, columnLeft);
+                    upLeftEndFound = checkNewSpace(board, myPosition, upLeftPosition, possibleMoves);
+                } else {
+                    upLeftEndFound = true;
+                }
+            }
+            if (!downRightEndFound) {
+                if (columnRight < 9 && rowDown > 0) {
+                    ChessPosition downRightPosition = new ChessPosition(rowDown, columnRight);
+                    downRightEndFound = checkNewSpace(board, myPosition, downRightPosition, possibleMoves);
+                } else {
+                    downRightEndFound = true;
+                }
+            }
+            if (!downLeftEndFound) {
+                if (columnLeft > 0 && rowDown > 0) {
+                    ChessPosition downLeftPosition = new ChessPosition(rowDown, columnLeft);
+                    downLeftEndFound = checkNewSpace(board, myPosition, downLeftPosition, possibleMoves);
+                } else {
+                    downLeftEndFound = true;
+                }
+            }
+            if (upRightEndFound && upLeftEndFound && downLeftEndFound && downRightEndFound) {
+                break;
+            }
+        }
+    }
+    void findRookMoves (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
+        int col = myPosition.getColumn();
+        int row = myPosition.getRow();
+
+        boolean upEndFound = false;
+        boolean downEndFound = false;
+        boolean rightEndFound = false;
+        boolean leftEndFound = false;
+
+        for (int i = 1; i < 9; i++) { // all four directions in one loop
+            int rowUp = row + i;
+            int rowDown = row - i;
+            int columnLeft = col - i;
+            int columnRight = col + i;
+
+            if (!upEndFound) {
+                if (rowUp < 9) {
+                    ChessPosition upPosition = new ChessPosition(rowUp, col);
+                    upEndFound = checkNewSpace(board, myPosition, upPosition, possibleMoves);
+                } else {
+                    upEndFound = true;
+                }
+            }
+            if (!downEndFound) {
+                if (rowDown > 0) {
+                    ChessPosition downPosition = new ChessPosition(rowDown, col);
+                    downEndFound = checkNewSpace(board, myPosition, downPosition, possibleMoves);
+                } else {
+                    downEndFound = true;
+                }
+            }
+            if (!leftEndFound) {
+                if (columnLeft > 0) {
+                    ChessPosition leftPosition = new ChessPosition(row, columnLeft);
+                    leftEndFound = checkNewSpace(board, myPosition, leftPosition, possibleMoves);
+                } else {
+                    leftEndFound = true;
+                }
+            }
+            if (!rightEndFound) {
+                if (columnRight < 9) {
+                    ChessPosition rightPosition = new ChessPosition(row, columnRight);
+                    rightEndFound = checkNewSpace(board, myPosition, rightPosition, possibleMoves);
+                } else {
+                    rightEndFound = true;
+                }
+            }
+            if (upEndFound && downEndFound && rightEndFound && leftEndFound) {
+                break;
+            }
+        }
+    }
+    void findKingMoves (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
+        int col = myPosition.getColumn();
+        int row = myPosition.getRow();
+
+        int rowUp = row + 1;
+        int rowDown = row - 1;
+        int columnLeft = col - 1;
+        int columnRight = col + 1;
+
+        if (rowUp < 9) {
+            ChessPosition upPosition = new ChessPosition(rowUp, col);
+            boolean notUsed = checkNewSpace(board, myPosition, upPosition, possibleMoves);
+        }
+        if (rowUp < 9 && columnLeft > 0) {
+            ChessPosition upLeftPosition = new ChessPosition(rowUp, columnLeft);
+            boolean notUsed = checkNewSpace(board, myPosition, upLeftPosition, possibleMoves);
+        }
+        if (rowUp < 9 && columnRight < 9) {
+            ChessPosition upRightPosition = new ChessPosition(rowUp, columnRight);
+            boolean notUsed = checkNewSpace(board, myPosition, upRightPosition, possibleMoves);
+        }
+        if (columnLeft > 0) {
+            ChessPosition leftPosition = new ChessPosition(row, columnLeft);
+            boolean notUsed = checkNewSpace(board, myPosition, leftPosition, possibleMoves);
+        }
+        if (columnRight < 9) {
+            ChessPosition rightPosition = new ChessPosition(row, columnRight);
+            boolean notUsed = checkNewSpace(board, myPosition, rightPosition, possibleMoves);
+        }
+        if (rowDown > 0) {
+            ChessPosition downPosition = new ChessPosition(rowDown, col);
+            boolean notUsed = checkNewSpace(board, myPosition, downPosition, possibleMoves);
+        }
+        if (rowDown > 0 && columnLeft > 0) {
+            ChessPosition downLeftPosition = new ChessPosition(rowDown, columnLeft);
+            boolean notUsed = checkNewSpace(board, myPosition, downLeftPosition, possibleMoves);
+        }
+        if (rowDown > 0 && columnRight < 9) {
+            ChessPosition downRightPosition = new ChessPosition(rowDown, columnRight);
+            boolean notUsed = checkNewSpace(board, myPosition, downRightPosition, possibleMoves);
+        }
+    }
+    void findQueenMoves (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
+        int col = myPosition.getColumn();
+        int row = myPosition.getRow();
+
+        // combination of both rook and bishop
+        boolean upEndFound = false;
+        boolean upLeftEndFound = false;
+        boolean upRightEndFound = false;
+        boolean downEndFound = false;
+        boolean downLeftEndFound = false;
+        boolean downRightEndFound = false;
+        boolean leftEndFound = false;
+        boolean rightEndFound = false;
+
+        for ( int i = 1; i < 9; i++) { // all 4 directions in one loop
+            int columnLeft = col - i;
+            int columnRight = col + i;
+            int rowUp = row + i;
+            int rowDown = row - i;
+
+            if (!upRightEndFound) {
+                if (columnRight < 9 && rowUp < 9 ) {
+                    ChessPosition upRightPosition = new ChessPosition(rowUp, columnRight);
+                    upRightEndFound = checkNewSpace(board, myPosition, upRightPosition, possibleMoves);
+                } else {
+                    upRightEndFound = true;
+                }
+
+            }
+            if (!upLeftEndFound) {
+                if (columnLeft > 0 && rowUp < 9) {
+                    ChessPosition upLeftPosition = new ChessPosition(rowUp, columnLeft);
+                    upLeftEndFound = checkNewSpace(board, myPosition, upLeftPosition, possibleMoves);
+                } else {
+                    upLeftEndFound = true;
+                }
+            }
+            if (!downRightEndFound) {
+                if (columnRight < 9 && rowDown > 0) {
+                    ChessPosition downRightPosition = new ChessPosition(rowDown, columnRight);
+                    downRightEndFound = checkNewSpace(board, myPosition, downRightPosition, possibleMoves);
+                } else {
+                    downRightEndFound = true;
+                }
+            }
+            if (!downLeftEndFound) {
+                if (columnLeft > 0 && rowDown > 0) {
+                    ChessPosition downLeftPosition = new ChessPosition(rowDown, columnLeft);
+                    downLeftEndFound = checkNewSpace(board, myPosition, downLeftPosition, possibleMoves);
+                } else {
+                    downLeftEndFound = true;
+                }
+            }
+            if (!upEndFound) {
+                if (rowUp < 9) {
+                    ChessPosition upPosition = new ChessPosition(rowUp, col);
+                    upEndFound = checkNewSpace(board, myPosition, upPosition, possibleMoves);
+                } else {
+                    upEndFound = true;
+                }
+            }
+            if (!downEndFound) {
+                if (rowDown > 0) {
+                    ChessPosition downPosition = new ChessPosition(rowDown, col);
+                    downEndFound = checkNewSpace(board, myPosition, downPosition, possibleMoves);
+                } else {
+                    downEndFound = true;
+                }
+            }
+            if (!leftEndFound) {
+                if (columnLeft > 0) {
+                    ChessPosition leftPosition = new ChessPosition(row, columnLeft);
+                    leftEndFound = checkNewSpace(board, myPosition, leftPosition, possibleMoves);
+                } else {
+                    leftEndFound = true;
+                }
+            }
+            if (!rightEndFound) {
+                if (columnRight < 9) {
+                    ChessPosition rightPosition = new ChessPosition(row, columnRight);
+                    rightEndFound = checkNewSpace(board, myPosition, rightPosition, possibleMoves);
+                } else {
+                    rightEndFound = true;
+                }
+            }
+            if (upEndFound && downEndFound && rightEndFound && leftEndFound && upLeftEndFound && upRightEndFound && downLeftEndFound && downRightEndFound) {
+                break;
+            }
+        }
+    }
+    void findKnightMoves (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
+        int col = myPosition.getColumn();
+        int row = myPosition.getRow();
+
+        // L shape
+        int twoDown = row - 2;
+        int oneDown = row - 1;
+        int twoUp = row + 2;
+        int oneUp = row + 1;
+        int twoLeft = col - 2;
+        int oneLeft = col - 1;
+        int twoRight = col + 2;
+        int oneRight = col + 1;
+
+        if (twoUp < 9 && oneLeft > 0) {
+            ChessPosition newPosition = new ChessPosition(twoUp, oneLeft);
+            boolean notUsed = checkNewSpace(board, myPosition, newPosition, possibleMoves);
+        }
+        if (twoUp < 9 && oneRight < 9) {
+            ChessPosition newPosition = new ChessPosition(twoUp, oneRight);
+            boolean notUsed = checkNewSpace(board, myPosition, newPosition, possibleMoves);
+        }
+        if (twoLeft > 0 && oneUp < 9) {
+            ChessPosition newPosition = new ChessPosition(oneUp, twoLeft);
+            boolean notUsed = checkNewSpace(board, myPosition, newPosition, possibleMoves);
+        }
+        if (twoLeft > 0 && oneDown > 0) {
+            ChessPosition newPosition = new ChessPosition(oneDown, twoLeft);
+            boolean notUsed = checkNewSpace(board, myPosition, newPosition, possibleMoves);
+        }
+        if (twoRight < 9 && oneUp < 9) {
+            ChessPosition newPosition = new ChessPosition(oneUp, twoRight);
+            boolean notUsed = checkNewSpace(board, myPosition, newPosition, possibleMoves);
+        }
+        if (twoRight < 9 && oneDown > 0) {
+            ChessPosition newPosition = new ChessPosition(oneDown, twoRight);
+            boolean notUsed = checkNewSpace(board, myPosition, newPosition, possibleMoves);
+        }
+        if (twoDown > 0 && oneLeft > 0) {
+            ChessPosition newPosition = new ChessPosition(twoDown, oneLeft);
+            boolean notUsed = checkNewSpace(board, myPosition, newPosition, possibleMoves);
+        }
+        if (twoDown > 0 && oneRight < 9) {
+            ChessPosition newPosition = new ChessPosition(twoDown, oneRight);
+            boolean notUsed = checkNewSpace(board, myPosition, newPosition, possibleMoves);
+        }
+    }    void findPawnMoves (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
+        throw new RuntimeException("Not implemented");
+    }
+
 
     boolean checkNewSpace(ChessBoard board, ChessPosition myPosition, ChessPosition newPosition, Collection<ChessMove> possibleMoves) {
         if (board.getPiece(newPosition) != null) {
