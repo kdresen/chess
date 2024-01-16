@@ -64,6 +64,9 @@ public class ChessBoard implements Cloneable{
         if (promotionPiece != null) {
             piece = promotePiece(piece, promotionPiece);
         }
+
+        boardPieces[endRow][endCol] = piece;
+        boardPieces[row][col] = null;
     }
 
     public ChessPiece promotePiece(ChessPiece piece, ChessPiece.PieceType promotionPiece) {
