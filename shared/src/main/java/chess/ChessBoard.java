@@ -107,4 +107,17 @@ public class ChessBoard {
         addPiece(new ChessPosition(7,8), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
 
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessBoard that = (ChessBoard) o;
+        return Arrays.deepEquals(boardPieces, that.boardPieces);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(boardPieces);
+    }
 }

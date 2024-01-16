@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static passoffTests.TestFactory.getNewMove;
@@ -76,5 +77,4 @@ public class ChessMoveTests {
         Assertions.assertEquals(4, set.size());
 
     }
-
 }
