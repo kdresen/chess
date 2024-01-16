@@ -15,6 +15,18 @@ public class ChessPiece {
     ChessGame.TeamColor pieceColor;
     ChessPiece.PieceType type;
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        try {
+            ChessPiece clonedPiece = (ChessPiece) super.clone();
+            clonedPiece.pieceColor = this.pieceColor;
+            clonedPiece.type = this.type;
+            return clonedPiece;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;

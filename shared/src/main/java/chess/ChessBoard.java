@@ -8,9 +8,30 @@ import java.util.Arrays;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard {
+public class ChessBoard implements Cloneable{
 
     private ChessPiece[][] boardPieces;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+
+        try {
+            ChessBoard clonedBoard = (ChessBoard) super.clone();
+            clonedBoard.boardPieces = new ChessPiece[8][8];
+
+            for (int row = 0; row < 8; row++) {
+                for (int col = 0; col < 8; col++) {
+                    ChessPiece originalPiece = boardPieces[row][col];
+                    if (originalPiece != null) {
+                        clonedBoard.boardPieces[row][col] = (ChessPiece) originalPiece.clone();
+                    }
+                }
+            }
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+        return super.clone();
+    }
 
     public ChessBoard() {
         boardPieces = new ChessPiece[8][8];
@@ -31,6 +52,27 @@ public class ChessBoard {
         } else {
             throw new IllegalArgumentException("Invalid chess position");
         }
+    }
+
+    public void movePiece(ChessPosition startPosition, ChessPosition endPosition, ChessPiece piece, ChessPiece.PieceType promotionPiece) {
+        int row = startPosition.getRow() - 1;
+        int col = startPosition.getColumn() - 1;
+
+        int endRow = endPosition.getRow() - 1;
+        int endCol = endPosition.getColumn() - 1;
+
+        if (promotionPiece != null) {
+            piece = promotePiece(piece, promotionPiece);
+        }
+    }
+
+    public ChessPiece promotePiece(ChessPiece piece, ChessPiece.PieceType promotionPiece) {
+        return switch (promotionPiece) {
+            case QUEEN -> new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.QUEEN);
+            case BISHOP -> new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.BISHOP);
+            case KNIGHT -> new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.KNIGHT);
+            default -> new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.ROOK);
+        };
     }
 
     private boolean isValidPosition(int row, int col) {

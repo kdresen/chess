@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -10,15 +11,39 @@ import java.util.Collection;
  */
 public class ChessGame {
 
-    public ChessGame() {
+    private TeamColor teamTurn;
+    private ChessBoard currentBoard;
+    private ChessBoard clonedBoard;
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        try {
+            ChessGame clonedGame = (ChessGame) super.clone();
+
+            if (currentBoard != null) {
+                clonedGame.currentBoard = (ChessBoard) currentBoard.clone();
+            }
+            return clonedGame;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ChessGame(){
+        teamTurn = TeamColor.WHITE;
+        currentBoard = new ChessBoard();
+        try {
+            clonedBoard = (ChessBoard) currentBoard.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return teamTurn;
     }
 
     /**
@@ -27,7 +52,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        teamTurn = team;
     }
 
     /**
@@ -46,7 +71,30 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> validMoves = new HashSet<>();
+        ChessPiece piece = currentBoard.getPiece(startPosition);
+        Collection<ChessMove> possibleChessMoves = piece.pieceMoves(currentBoard, startPosition);
+
+        for (ChessMove move : possibleChessMoves) {
+            // make copy of board
+            try {
+                clonedBoard = (ChessBoard) currentBoard.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+            // make the move
+            ChessPosition endPosition = move.getEndPosition();
+            ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+            clonedBoard.movePiece(startPosition, endPosition, piece, promotionPiece);
+
+            // is king in check?
+            boolean invalidMove = isInCheck(piece.getTeamColor());
+
+            if (!invalidMove) {
+                validMoves.add(move);
+            }
+        }
+        return validMoves;
     }
 
     /**
@@ -56,7 +104,48 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+        TeamColor currentTeam = getTeamTurn();
+
+        ChessPiece movingPiece = currentBoard.getPiece(startPosition);
+        TeamColor pieceTeam = movingPiece.getTeamColor();
+
+        // check move to see if it is in validMoves
+        if (teamTurn == pieceTeam) {
+            Collection<ChessMove> validMoves = validMoves(startPosition);
+            boolean isValidMove = false;
+            for (ChessMove validMove : validMoves) {
+                if (validMove.equals(move)) {
+                    isValidMove = true;
+                    break;
+                }
+            }
+
+            // move piece to endPosition and set startPosition to null
+            if (isValidMove) {
+                currentBoard.movePiece(startPosition, endPosition, movingPiece, promotionPiece);
+                // if promotionPiece is not null change the PieceType
+                try {
+                    clonedBoard = (ChessBoard) currentBoard.clone();
+                } catch (CloneNotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // switch teamTurn
+                if (teamTurn == TeamColor.WHITE) {
+                    teamTurn = TeamColor.BLACK;
+                } else {
+                    teamTurn = TeamColor.WHITE;
+                }
+            } else {
+                throw new InvalidMoveException();
+            }
+        } else {
+            throw new InvalidMoveException();
+        }
     }
 
     /**
