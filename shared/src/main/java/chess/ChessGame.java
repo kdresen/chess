@@ -9,34 +9,15 @@ import java.util.HashSet;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessGame implements Cloneable{
+public class ChessGame {
 
     private TeamColor teamTurn;
     private ChessBoard currentBoard;
-    private ChessBoard clonedBoard;
+    private ChessBoard clonedBoard = null;
 
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        try {
-            ChessGame clonedGame = (ChessGame) super.clone();
-
-            if (currentBoard != null) {
-                clonedGame.currentBoard = (ChessBoard) currentBoard.clone();
-            }
-            return clonedGame;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public ChessGame(){
+    public ChessGame() {
         teamTurn = TeamColor.WHITE;
         currentBoard = new ChessBoard();
-        try {
-            clonedBoard = (ChessBoard) currentBoard.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -71,30 +52,8 @@ public class ChessGame implements Cloneable{
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        Collection<ChessMove> validMoves = new HashSet<>();
-        ChessPiece piece = currentBoard.getPiece(startPosition);
-        Collection<ChessMove> possibleChessMoves = piece.pieceMoves(currentBoard, startPosition);
-
-        for (ChessMove move : possibleChessMoves) {
-            // make copy of board
-            try {
-                clonedBoard = (ChessBoard) currentBoard.clone();
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
-            // make the move
-            ChessPosition endPosition = move.getEndPosition();
-            ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
-            clonedBoard.movePiece(startPosition, endPosition, piece, promotionPiece);
-
-            // is king in check?
-            boolean invalidMove = isInCheck(piece.getTeamColor());
-
-            if (!invalidMove) {
-                validMoves.add(move);
-            }
-        }
-        return validMoves;
+        // TODO
+        return null;
     }
 
     /**
@@ -104,48 +63,7 @@ public class ChessGame implements Cloneable{
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-
-        ChessPosition startPosition = move.getStartPosition();
-        ChessPosition endPosition = move.getEndPosition();
-        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
-        TeamColor currentTeam = getTeamTurn();
-
-        ChessPiece movingPiece = currentBoard.getPiece(startPosition);
-        TeamColor pieceTeam = movingPiece.getTeamColor();
-
-        // check move to see if it is in validMoves
-        if (teamTurn == pieceTeam) {
-            Collection<ChessMove> validMoves = validMoves(startPosition);
-            boolean isValidMove = false;
-            for (ChessMove validMove : validMoves) {
-                if (validMove.equals(move)) {
-                    isValidMove = true;
-                    break;
-                }
-            }
-
-            // move piece to endPosition and set startPosition to null
-            if (isValidMove) {
-                currentBoard.movePiece(startPosition, endPosition, movingPiece, promotionPiece);
-                // if promotionPiece is not null change the PieceType
-                try {
-                    clonedBoard = (ChessBoard) currentBoard.clone();
-                } catch (CloneNotSupportedException e) {
-                    throw new RuntimeException(e);
-                }
-
-                // switch teamTurn
-                if (teamTurn == TeamColor.WHITE) {
-                    teamTurn = TeamColor.BLACK;
-                } else {
-                    teamTurn = TeamColor.WHITE;
-                }
-            } else {
-                throw new InvalidMoveException();
-            }
-        } else {
-            throw new InvalidMoveException();
-        }
+        // TODO
     }
 
     /**
@@ -240,11 +158,7 @@ public class ChessGame implements Cloneable{
      */
     public void setBoard(ChessBoard board) {
         currentBoard = board;
-        try {
-            clonedBoard = (ChessBoard) currentBoard.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+        clonedBoard = (ChessBoard) currentBoard.clone();
     }
 
     /**

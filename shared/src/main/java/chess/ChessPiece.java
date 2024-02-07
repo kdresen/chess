@@ -16,14 +16,11 @@ public class ChessPiece implements Cloneable{
     ChessPiece.PieceType type;
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone() {
         try {
-            ChessPiece clonedPiece = (ChessPiece) super.clone();
-            clonedPiece.pieceColor = this.pieceColor;
-            clonedPiece.type = this.type;
-            return clonedPiece;
+            return (ChessPiece) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+            return new ChessPiece(this.getTeamColor(), this.getPieceType());
         }
     }
 

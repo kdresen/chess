@@ -13,24 +13,23 @@ public class ChessBoard implements Cloneable{
     private ChessPiece[][] boardPieces;
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
-
+    public Object clone() {
+        ChessBoard board = null;
         try {
-            ChessBoard clonedBoard = (ChessBoard) super.clone();
-            clonedBoard.boardPieces = new ChessPiece[8][8];
-
-            for (int row = 0; row < 8; row++) {
-                for (int col = 0; col < 8; col++) {
-                    ChessPiece originalPiece = boardPieces[row][col];
-                    if (originalPiece != null) {
-                        clonedBoard.boardPieces[row][col] = (ChessPiece) originalPiece.clone();
-                    }
-                }
-            }
+            board = (ChessBoard) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+            board = new ChessBoard();
         }
-        return super.clone();
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (this.boardPieces[i][j] != null) {
+                    board.boardPieces[i][j] = (ChessPiece) this.boardPieces[i][j].clone();
+                }
+
+            }
+        }
+        return board;
     }
 
     public ChessBoard() {
@@ -52,30 +51,6 @@ public class ChessBoard implements Cloneable{
         } else {
             throw new IllegalArgumentException("Invalid chess position");
         }
-    }
-
-    public void movePiece(ChessPosition startPosition, ChessPosition endPosition, ChessPiece piece, ChessPiece.PieceType promotionPiece) {
-        int row = startPosition.getRow() - 1;
-        int col = startPosition.getColumn() - 1;
-
-        int endRow = endPosition.getRow() - 1;
-        int endCol = endPosition.getColumn() - 1;
-
-        if (promotionPiece != null) {
-            piece = promotePiece(piece, promotionPiece);
-        }
-
-        boardPieces[endRow][endCol] = piece;
-        boardPieces[row][col] = null;
-    }
-
-    public ChessPiece promotePiece(ChessPiece piece, ChessPiece.PieceType promotionPiece) {
-        return switch (promotionPiece) {
-            case QUEEN -> new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.QUEEN);
-            case BISHOP -> new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.BISHOP);
-            case KNIGHT -> new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.KNIGHT);
-            default -> new ChessPiece(piece.getTeamColor(), ChessPiece.PieceType.ROOK);
-        };
     }
 
     private boolean isValidPosition(int row, int col) {
