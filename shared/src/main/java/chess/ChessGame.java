@@ -13,7 +13,8 @@ public class ChessGame {
 
     private TeamColor teamTurn;
     private ChessBoard currentBoard;
-    private ChessBoard clonedBoard = null;
+
+    private ChessBoard clonedBoard;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
@@ -52,8 +53,47 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        // TODO
-        return null;
+        Collection<ChessMove> validMoves = new HashSet<>();
+
+        // starting position
+        ChessPiece piece = currentBoard.getPiece(startPosition);
+        // get possible moves for piece
+        Collection<ChessMove> possibleChessMoves = piece.pieceMoves(currentBoard, startPosition);
+
+        // test all moves to see if king is put into check
+        // if move results in friendly king in check, don't add to validmoves
+        for (ChessMove move : possibleChessMoves) {
+            // make clone of current board to make moves on
+            clonedBoard = (ChessBoard) currentBoard.clone();
+
+            // make move
+            ChessPosition endPos = move.getEndPosition();
+            ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+
+            // assume since the move is in possibleChessMoves, it won't go out of bounds
+            int row = startPosition.getRow() - 1;
+            int col = startPosition.getColumn() - 1;
+            int endRow = endPos.getRow() - 1;
+            int endCol = endPos.getColumn() - 1;
+
+            // promote piece if applicable
+            if (promotionPiece != null) {
+                piece.type = promotionPiece;
+            }
+            // move piece to new position
+            clonedBoard.boardPieces[endRow][endCol] = piece;
+            clonedBoard.boardPieces[row][col] = null;
+
+            // check if king is in check
+            boolean invalidMove = isInCheck(piece.getTeamColor());
+            // if not in check, move is valid
+            if (!invalidMove) {
+                validMoves.add(move);
+            }
+
+            clonedBoard = (ChessBoard) currentBoard.clone();
+        }
+        return validMoves;
     }
 
     /**
@@ -63,7 +103,56 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        // TODO
+        // find piece in starting position
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+        TeamColor currentTeam = getTeamTurn();
+
+        ChessPiece movingPiece = currentBoard.getPiece(startPosition);
+        TeamColor pieceTeam = movingPiece.getTeamColor();
+        // check if move is valid
+
+        if (teamTurn == pieceTeam) {
+            Collection<ChessMove> validMoves = validMoves(startPosition);
+            boolean isValidMove = false;
+            for (ChessMove checkMove : validMoves) {
+                if (checkMove.equals(move)) {
+                    isValidMove = true;
+                    break;
+                }
+            }
+
+            // move piece
+            if (isValidMove) {
+                // assume since the move is in possibleChessMoves, it won't go out of bounds
+                int row = startPosition.getRow() - 1;
+                int col = startPosition.getColumn() - 1;
+                int endRow = endPosition.getRow() - 1;
+                int endCol = endPosition.getColumn() - 1;
+
+                // promote piece if applicable
+                if (promotionPiece != null) {
+                    movingPiece.type = promotionPiece;
+                }
+                // move piece to new position
+                currentBoard.boardPieces[endRow][endCol] = movingPiece;
+                currentBoard.boardPieces[row][col] = null;
+
+                // re clone board to account for move
+                clonedBoard = (ChessBoard) currentBoard.clone();
+
+                if (teamTurn == TeamColor.WHITE) {
+                    teamTurn = TeamColor.BLACK;
+                } else {
+                    teamTurn = TeamColor.WHITE;
+                }
+            } else {
+                throw new InvalidMoveException();
+            }
+        } else {
+            throw new InvalidMoveException();
+        }
     }
 
     /**

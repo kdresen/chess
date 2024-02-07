@@ -10,7 +10,7 @@ import java.util.Arrays;
  */
 public class ChessBoard implements Cloneable{
 
-    private ChessPiece[][] boardPieces;
+    public ChessPiece[][] boardPieces;
 
     @Override
     public Object clone() {
@@ -20,6 +20,7 @@ public class ChessBoard implements Cloneable{
         } catch (CloneNotSupportedException e) {
             board = new ChessBoard();
         }
+        board.boardPieces = new ChessPiece[8][8];
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
