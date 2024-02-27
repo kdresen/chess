@@ -2,56 +2,31 @@ package model;
 
 import chess.ChessGame;
 
-import java.util.Objects;
+public record GameData(String whiteUsername, String blackUsername, String gameName, int gameID, ChessGame game) {
 
-class GameData {
-    private final String whiteUsername;
-    private final String blackUsername;
-    private final String gameName;
-    private final int gameID;
-    private final ChessGame game;
-
-    GameData(String whiteUsername, String blackUsername, String gameName, int gameID, ChessGame game) {
-        this.whiteUsername = whiteUsername;
-        this.blackUsername = blackUsername;
-        this.gameName = gameName;
-        this.gameID = gameID;
-        this.game = game;
+    // Methods for changes in the GameData object
+    public GameData changeWhiteUsername(String newName) {
+        return new GameData(newName, blackUsername, gameName, gameID, game);
+    }
+    public GameData changeBlackUsername(String newName) {
+        return new GameData(whiteUsername, newName, gameName, gameID, game);
+    }
+    public GameData changeGameName(String newName) {
+        return new GameData(whiteUsername, blackUsername, newName, gameID, game);
+    }
+    public GameData changeGameID(int newID) {
+        return new GameData(whiteUsername, blackUsername, gameName, newID, game);
+    }
+    public GameData newMove(ChessGame newMove) {
+        return new GameData(whiteUsername, blackUsername, gameName, gameID, newMove);
     }
 
-    public int getGameID() {
-        return gameID;
+    public boolean isWhiteUsernameNull() {
+        return whiteUsername == null;
     }
-
-    public String getWhiteUsername() {
-        return whiteUsername;
+    public boolean isBlackUsernameNull() {
+        return blackUsername == null;
     }
-
-    public String getBlackUsername() {
-        return blackUsername;
-    }
-
-    public String getGameName() {
-        return gameName;
-    }
-
-    public ChessGame getGame() {
-        return game;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GameData gameData = (GameData) o;
-        return gameID == gameData.gameID && Objects.equals(whiteUsername, gameData.whiteUsername) && Objects.equals(blackUsername, gameData.blackUsername) && Objects.equals(gameName, gameData.gameName) && Objects.equals(game, gameData.game);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(whiteUsername, blackUsername, gameName, gameID, game);
-    }
-
     @Override
     public String toString() {
         return "GameData{" +
