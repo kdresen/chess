@@ -2,10 +2,19 @@ package server;
 
 import com.google.gson.Gson;
 import spark.*;
+import dataAccess.*;
+import model.*;
+import service.*;
 
 import java.util.Map;
 
 public class Server {
+    private final ClearApplicationService clearApplicationService;
+
+
+    public Server() {
+        clearApplicationService = new ClearApplicationService(userDAO, authDAO, gameDAO);
+    }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
