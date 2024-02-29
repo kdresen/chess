@@ -16,7 +16,12 @@ public class MemoryUserDAO implements UserDAO {
     public void addUser(String username, String password, String email) throws DataAccessException {
         // add new user
         UserData user = new UserData(username, password, email);
-        userMap.put(username, user);
+        if (getUser(username) != null) {
+            userMap.put(username, user);
+        } else {
+            throw new DataAccessException("Error: already taken");
+        }
+
     }
 
     public UserData getUser(String username) {

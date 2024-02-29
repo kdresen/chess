@@ -14,13 +14,14 @@ public class MemoryAuthDAO implements AuthDAO {
         this.authMap = new HashMap<>();
     }
 
-    public void createAuth(String username) throws DataAccessException {
+    public AuthData createAuth(String username) throws DataAccessException {
         String authToken = UUID.randomUUID().toString();
         AuthData auth = new AuthData(authToken, username);
         authMap.put(authToken, auth);
+        return auth;
     }
 
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws DataAccessException {
         return authMap.get(authToken);
     }
 
@@ -29,7 +30,7 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException {
         authMap.clear();
     }
 }

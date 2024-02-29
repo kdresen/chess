@@ -13,7 +13,7 @@ public class Server {
 
 
     public Server() {
-        clearApplicationService = new ClearApplicationService(userDAO, authDAO, gameDAO);
+        clearApplicationService = new ClearApplicationService(UserDAOManager.getUserDAO(), AuthDAOManager.getAuthDAO(), GameDAOManager.getGameDAO());
     }
 
     public int run(int desiredPort) {
@@ -22,6 +22,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.delete("/db", this::clearApplication);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -30,5 +31,10 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+    private Object clearApplication(Request req, Response res) {
+        clearApplicationService.deleteAll();
+        res.status(200); // HTTP 200 OK
+        return "{}";
     }
 }
