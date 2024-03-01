@@ -28,10 +28,6 @@ public class MemoryUserDAO implements UserDAO {
         // retrieve a user
         return userMap.get(username);
     }
-    public void deleteUser(String username) {
-        // delete a user
-        userMap.remove(username);
-    }
 
     @Override
     public void clear() {
