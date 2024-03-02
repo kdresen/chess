@@ -2,12 +2,13 @@ package dataAccess;
 
 import chess.ChessGame;
 import model.GameData;
+import model.GameInfo;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface GameDAO {
 
-    public void addGame(String whiteUsername, String blackUsername, String gameName, int gameID, ChessGame game);
+    public GameData addGame(String whiteUsername, String blackUsername, String gameName, int gameID, ChessGame game);
 
     public GameData getGame(int gameID);
 
@@ -17,6 +18,6 @@ public interface GameDAO {
 
     public void clear();
 
-    public Collection<GameData> listGames();
+    public List<GameInfo> listGames();
 
 }

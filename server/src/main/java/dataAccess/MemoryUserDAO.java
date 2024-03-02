@@ -4,9 +4,10 @@ import model.UserData;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class MemoryUserDAO implements UserDAO {
-    private Map<String, UserData> userMap;
+    public Map<String, UserData> userMap;
 
     public MemoryUserDAO() {
         // constructor for a new HashMap
@@ -16,7 +17,8 @@ public class MemoryUserDAO implements UserDAO {
     public void addUser(String username, String password, String email) throws DataAccessException {
         // add new user
         UserData user = new UserData(username, password, email);
-        if (getUser(username) != null) {
+        UserData existingUser = getUser(username);
+        if (existingUser == null || existingUser.username() == null) {
             userMap.put(username, user);
         } else {
             throw new DataAccessException("Error: already taken");

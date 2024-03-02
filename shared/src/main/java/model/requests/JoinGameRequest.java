@@ -2,6 +2,6 @@ package model.requests;
 
 import chess.ChessGame;
 
-public record JoinGameRequest(String authToken, ChessGame.TeamColor teamColor, int gameID) {
+public record JoinGameRequest(String authToken, String playerColor, int gameID) {
 
 }

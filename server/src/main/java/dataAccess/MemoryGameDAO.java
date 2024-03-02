@@ -2,11 +2,10 @@ package dataAccess;
 
 import chess.ChessGame;
 import model.GameData;
+import model.GameInfo;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MemoryGameDAO implements GameDAO {
     private Map<Integer, GameData> gameMap;
@@ -17,9 +16,14 @@ public class MemoryGameDAO implements GameDAO {
         this.gameMap = new HashMap<>();
     }
     @Override
-    public void addGame(String whiteUsername, String blackUsername, String gameName, int gameID, ChessGame game){
+    public GameData addGame(String whiteUsername, String blackUsername, String gameName, int gameID, ChessGame game){
+        if (gameID == 0) {
+            gameID = currentGameID + 1;
+        }
         GameData gameObject = new GameData(whiteUsername, blackUsername, gameName, gameID, game);
-        gameMap.put(gameID, gameObject);
+        currentGameID++;
+        gameMap.put(gameObject.gameID(), gameObject);
+        return gameObject;
     }
 
     public int getNewGameID() {
@@ -52,7 +56,13 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public Collection<GameData> listGames() {
-        return gameMap.values();
+    public List<GameInfo> listGames() {
+        return gameMap.values().stream()
+                .map(gameData -> new GameInfo(
+                        gameData.whiteUsername(),
+                        gameData.blackUsername(),
+                        gameData.gameName(),
+                        gameData.gameID()))
+                .collect(Collectors.toList());
     }
 }

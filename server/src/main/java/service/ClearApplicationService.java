@@ -1,8 +1,6 @@
 package service;
 
 import dataAccess.*;
-import model.results.ClearApplicationResult;
-import model.results.ErrorResult;
 
 public class ClearApplicationService {
 
@@ -16,16 +14,10 @@ public class ClearApplicationService {
         this.gameDAO = gameDAO;
     }
     // removes all objects from gameDAO, userDAO, and authDAO
-    public Object deleteAll() {
-        try {
-            userDAO.clear();
-            authDAO.clear();
-            gameDAO.clear();
-            return new ClearApplicationResult(200, "{}");
-        } catch (DataAccessException e) {
-            return new ErrorResult(500, e.getMessage());
-        }
-
+    public void deleteAll() throws DataAccessException {
+        userDAO.clear();
+        authDAO.clear();
+        gameDAO.clear();
     }
 
 }

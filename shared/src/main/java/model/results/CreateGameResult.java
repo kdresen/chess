@@ -1,3 +1,3 @@
 package model.results;
 
-public record CreateGameResult(int statusCode, String gameName) {}
+public record CreateGameResult(int gameID) {}

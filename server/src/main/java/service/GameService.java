@@ -2,94 +2,82 @@ package service;
 
 import chess.ChessGame;
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
-import dataAccess.UserDAO;
 import model.AuthData;
 import model.GameData;
 import model.requests.CreateGameRequest;
 import model.requests.JoinGameRequest;
 import model.results.CreateGameResult;
-import model.results.ErrorResult;
-import model.results.JoinGameResult;
 import model.results.ListGamesResult;
 
-import java.util.Collection;
 import java.util.Objects;
 
 public class GameService {
-    private final UserDAO userDAO;
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
 
-    public GameService (AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) {
-        this.userDAO = userDAO;
+    public GameService (AuthDAO authDAO, GameDAO gameDAO) {
         this.gameDAO = gameDAO;
         this.authDAO = authDAO;
     }
     // returns list of all games in gameDAO
-    public Object listGames(String authToken) {
+    public ListGamesResult listGames(String authToken) throws DataAccessException {
         AuthData auth = authDAO.getAuth(authToken);
-        if (Objects.equals(auth.authToken(), null)) {
-            return new ErrorResult(401, "Error: unauthorized");
+        if (Objects.equals(auth, null)) {
+            throw new DataAccessException("Error: unauthorized");
         }
-        return new ListGamesResult(200, gameDAO.listGames());
+        return new ListGamesResult(gameDAO.listGames());
     }
     // creates new game in gameDAO
-    public Object createGame(CreateGameRequest req) {
+    public CreateGameResult createGame(CreateGameRequest req) throws DataAccessException {
+        if (Objects.equals(req, null)) {
+            throw new DataAccessException("Error: bad request");
+        }
         if (Objects.equals(req.authToken(), null) || Objects.equals(req.gameName(), null)) {
-            return new ErrorResult(400, "Error: bad request");
-        }
-        AuthData auth = authDAO.getAuth(req.authToken());
-        if (Objects.equals(auth.authToken(), null)) {
-            return new ErrorResult(401, "Error: unauthorized");
-        }
-        gameDAO.addGame(null, null, req.gameName(), 0, new ChessGame());
-        return new CreateGameResult(200, req.gameName());
-    }
-    // adds user to game from gameID, teamColor can be null
-    public Object joinGame(JoinGameRequest req) {
-        if (Objects.equals(req.authToken(), null) || Objects.equals(gameDAO.getGame(req.gameID()), null)) {
-            return new ErrorResult(400, "Error: bad request");
+            throw new DataAccessException("Error: bad request");
         }
         AuthData auth = authDAO.getAuth(req.authToken());
         if (Objects.equals(auth, null)) {
-            return new ErrorResult(400, "Error: unauthorized");
+            throw new DataAccessException("Error: unauthorized");
+        }
+        GameData result = gameDAO.addGame(null, null, req.gameName(), 0, new ChessGame());
+        return new CreateGameResult(result.gameID());
+    }
+    // adds user to game from gameID, teamColor can be null
+    public void joinGame(JoinGameRequest req) throws DataAccessException {
+        if (Objects.equals(req, null)) {
+            throw new DataAccessException("Error: bad request");
+        }
+        if (Objects.equals(req.authToken(), null) || Objects.equals(gameDAO.getGame(req.gameID()), null)) {
+            throw new DataAccessException("Error: bad request");
+        }
+        if (!Objects.equals(req.playerColor(), "WHITE") && !Objects.equals(req.playerColor(), "BLACK") && !Objects.equals(req.playerColor(), null)) {
+            throw new DataAccessException("Error: bad request");
+        }
+        AuthData auth = authDAO.getAuth(req.authToken());
+        if (Objects.equals(auth, null)) {
+            throw new DataAccessException("Error: unauthorized");
         }
         GameData game = gameDAO.getGame(req.gameID());
         GameData updatedGame;
-        if (Objects.equals(req.teamColor(), null)) {
+        if (Objects.equals(req.playerColor(), "WHITE")) {
             if (!game.isWhiteUsernameNull()) {
-                updatedGame = new GameData(auth.username(), game.blackUsername(), game.gameName(), game.gameID(), game.game());
-            } else if (!game.isBlackUsernameNull()) {
-                updatedGame = new GameData(game.whiteUsername(), auth.username(), game.gameName(), game.gameID(), game.game());
+                throw new DataAccessException("Error: already taken");
             } else {
-                return new ErrorResult(403, "Error: already taken");
+                updatedGame = new GameData(auth.username(), game.blackUsername(), game.gameName(), game.gameID(), game.game());
+                gameDAO.deleteGame(game.gameID());
+                gameDAO.addGame(updatedGame.whiteUsername(), updatedGame.blackUsername(), updatedGame.gameName(), updatedGame.gameID(), updatedGame.game());
             }
-            gameDAO.deleteGame(game.gameID());
-            gameDAO.addGame(updatedGame.whiteUsername(), updatedGame.blackUsername(), updatedGame.gameName(), updatedGame.gameID(), updatedGame.game());
-            return new JoinGameResult(200, "{}");
-        } else {
-            if (req.teamColor() == ChessGame.TeamColor.WHITE) {
-                if (!game.isWhiteUsernameNull()) {
-                    return new ErrorResult(403, "Error: already taken");
-                } else {
-                    updatedGame = new GameData(auth.username(), game.blackUsername(), game.gameName(), game.gameID(), game.game());
-                    gameDAO.deleteGame(game.gameID());
-                    gameDAO.addGame(updatedGame.whiteUsername(), updatedGame.blackUsername(), updatedGame.gameName(), updatedGame.gameID(), updatedGame.game());
-                    return new JoinGameResult(200, "{}");
-                }
+        }
+        if (Objects.equals(req.playerColor(), "BLACK")) {
+            if (!game.isBlackUsernameNull()) {
+                throw new DataAccessException("Error: already taken");
+            } else {
+                updatedGame = new GameData(game.whiteUsername(), auth.username(), game.gameName(), game.gameID(), game.game());
+                gameDAO.deleteGame(game.gameID());
+                gameDAO.addGame(updatedGame.whiteUsername(), updatedGame.blackUsername(), updatedGame.gameName(), updatedGame.gameID(), updatedGame.game());
             }
-            if (req.teamColor() == ChessGame.TeamColor.BLACK) {
-                if (!game.isBlackUsernameNull()) {
-                    return new ErrorResult(403, "Error: already taken");
-                } else {
-                    updatedGame = new GameData(game.whiteUsername(), auth.username(), game.gameName(), game.gameID(), game.game());
-                    gameDAO.deleteGame(game.gameID());
-                    gameDAO.addGame(updatedGame.whiteUsername(), updatedGame.blackUsername(), updatedGame.gameName(), updatedGame.gameID(), updatedGame.game());
-                    return new JoinGameResult(200, "{}");
-                }
-            }
-            return new ErrorResult(400, "Error: bad request");
         }
     }
 }

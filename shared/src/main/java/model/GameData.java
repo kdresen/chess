@@ -2,6 +2,8 @@ package model;
 
 import chess.ChessGame;
 
+import java.util.Objects;
+
 public record GameData(String whiteUsername, String blackUsername, String gameName, int gameID, ChessGame game) {
 
     // Methods for changes in the GameData object
@@ -22,10 +24,10 @@ public record GameData(String whiteUsername, String blackUsername, String gameNa
     }
 
     public boolean isWhiteUsernameNull() {
-        return whiteUsername == null;
+        return Objects.equals(whiteUsername, null);
     }
     public boolean isBlackUsernameNull() {
-        return blackUsername == null;
+        return Objects.equals(blackUsername, null);
     }
     @Override
     public String toString() {
