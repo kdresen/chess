@@ -52,6 +52,7 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public void clear() {
+        currentGameID = 0;
         gameMap.clear();
     }
 

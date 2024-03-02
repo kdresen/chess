@@ -31,6 +31,7 @@ public class CreateGameTests {
     void reset() throws DataAccessException {
         clearApplicationService.deleteAll();
     }
+    
     @Test
     @DisplayName("Create Game Successful")
     void createGameSuccessful() {
